@@ -7,6 +7,7 @@ Database: Ms Sql server
 Architecture: 3 tier architecture, client-server Architecture
 
 framework: ASP.net Core
+
 Task tracker is a project used to track and manage your tasks.
 
 The user should be able to:
