@@ -216,8 +216,10 @@ namespace TaskTrackerDataLayer
 
             return null;
         }
-        public static int AddNewTask(string description, byte status, DateTime createdAt, DateTime updatedAt)
+        public static int AddNewTask(TaskDTO DTO)
         {
+            int newTaskID = 0;
+
             try
             {
                 using (SqlConnection connection = new SqlConnection(ConnectionString))
@@ -226,18 +228,25 @@ namespace TaskTrackerDataLayer
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        command.Parameters.AddWithValue("@description", description);
-                        command.Parameters.AddWithValue("@status", description);
-                        command.Parameters.AddWithValue("@createdAt", description);
-                        command.Parameters.AddWithValue("@updatedAt", description);
+                        command.Parameters.AddWithValue("@description", DTO.TaskDescription);
+                        command.Parameters.AddWithValue("@status", DTO.TaskStatus);
+                        command.Parameters.AddWithValue("@createdAt", DTO.CreatedAt);
+                        command.Parameters.AddWithValue("@updatedAt", DTO.UpdatedAt);
 
-                        var outputParameter = SqlParameter("@newTaskId", SqlDbType.Int)
-                        {
-                            
-                        }
+                        var outputParameter = new SqlParameter("@newTaskId", SqlDbType.Int)
+                        { 
+                            Direction = ParameterDirection.Output 
+                        };
 
+                        command.Parameters.Add(outputParameter);
                         
+                        connection.Open();
 
+                        command.ExecuteNonQuery();
+
+                        connection.Close();
+
+                        newTaskID = (int)outputParameter.Value;
                     }
                 }
             }
@@ -246,6 +255,8 @@ namespace TaskTrackerDataLayer
 
                 throw;
             }
+
+            return newTaskID;
         }
         //public static bool UpdateTask()
         //{
