@@ -76,13 +76,13 @@ namespace TaskTrackerBusinessLogic
         }
         private bool _AddNewTask()
         {
-            this.TaskID = TaskTrackerData.AddNewTask(this.TaskDescription, this.TaskStatus, this.CreatedAt, this.UpdatedAt);
+            this.TaskID = TaskTrackerData.AddNewTask(this.DTO);
             return TaskID != 0;
         }
-        //private bool _UpdateTask()
-        //{
-        //    return TaskTrackerData.UpdateTask(this.TaskID, this.TaskDescription, this.TaskStatus, this.CreatedAt, this.UpdatedAt);
-        //}
+        private bool _UpdateTask()
+        {
+            return TaskTrackerData.UpdateTask(this.TaskID, this.TaskDescription, this.TaskStatus, this.CreatedAt, this.UpdatedAt);
+        }
         //public static bool DeleteTask()
         //{
         //    return TaskTrackerData.DeleteTask();
