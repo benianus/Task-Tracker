@@ -51,15 +51,15 @@ namespace TaskTrackerBusinessLogic
         }
         public static List<TaskDTO> GetTasksDone()
         {
-            return TaskTrackerData.GetTasksDone();
+            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.Done);
         }
         public static List<TaskDTO> GetTaskInProgress()
         {
-            return TaskTrackerData.GetTaskInProgress();
+            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.InProgress);
         }
         public static List<TaskDTO> GetTasksNotDone()
         {
-            return TaskTrackerData.GetTasksNotDone();
+            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.NotDone);
         }
         public static TaskTracker FindTaskById(int TaskId)
         {
@@ -81,24 +81,32 @@ namespace TaskTrackerBusinessLogic
         }
         private bool _UpdateTask()
         {
-            return TaskTrackerData.UpdateTask(this.TaskID, this.TaskDescription, this.TaskStatus, this.CreatedAt, this.UpdatedAt);
+            return TaskTrackerData.UpdateTask(this.DTO);
         }
-        //public static bool DeleteTask()
-        //{
-        //    return TaskTrackerData.DeleteTask();
-        //}
-        //public bool Save()
-        //{
-        //    switch(Mode)
-        //    {
-        //        case enMode.AddNew:
-        //            Mode = enMode.Update;
-        //            return _AddNewTask();
-        //        case enMode.Update:
-        //            return _UpdateTask();
-        //    }
+        public static bool DeleteTask(int TaskId)
+        {
+            return TaskTrackerData.DeleteTask(TaskId);
+        }
+        public static bool MarkTaskInProgress(int taskId)
+        {
+            return TaskTrackerData.MarkTaskInProgress(taskId);
+        }
+        public static bool MarkTaskDone(int taskId)
+        {
+            return TaskTrackerData.MarkTaskDone(taskId);
+        }
+        public bool Save()
+        {
+            switch (Mode)
+            {
+                case enMode.AddNew:
+                    Mode = enMode.Update;
+                    return _AddNewTask();
+                case enMode.Update:
+                    return _UpdateTask();
+            }
 
-        //    return false;
-        //}
+            return false;
+        }
     }
 }
