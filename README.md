@@ -2,7 +2,7 @@ Task tracker Backend project with Restful API
 
 Language used: C#
 
-Database: Ms Sql server
+Database: Ms Sql server, restore TaskTracker.bak file to you RDBMS 
 
 Architecture: 3 tier architecture, client-server Architecture
 
