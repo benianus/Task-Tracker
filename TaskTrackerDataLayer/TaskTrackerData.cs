@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration.Xml;
 
 namespace TaskTrackerDataLayer
 {
@@ -25,6 +26,7 @@ namespace TaskTrackerDataLayer
     {
         public static string ConnectionString = "Server = .; Database = TaskTracker; User id = sa; Password = 123456; " +
             "Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;";
+
         public static List<TaskDTO> GetAllTaskList()
         {
             List<TaskDTO> AllTasks = new List<TaskDTO>();
@@ -41,16 +43,24 @@ namespace TaskTrackerDataLayer
 
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            while (reader.Read())
+                            if (reader.HasRows)
                             {
-                                AllTasks.Add(new TaskDTO(
-                                    reader.GetInt32(reader.GetOrdinal("TaskId")),
-                                    reader.GetString(reader.GetOrdinal("Description")),
-                                    reader.GetByte(reader.GetOrdinal("Status")),
-                                    reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                                    reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-                                    ));
+                                while (reader.Read())
+                                {
+                                    AllTasks.Add(new TaskDTO(
+                                        reader.GetInt32(reader.GetOrdinal("TaskId")),
+                                        reader.GetString(reader.GetOrdinal("Description")),
+                                        reader.GetByte(reader.GetOrdinal("Status")),
+                                        reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                                        reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
+                                        ));
+                                }
                             }
+                            else
+                            {
+                                return null;
+                            }
+
                         }
                     }
                     connection.Close();
@@ -64,32 +74,36 @@ namespace TaskTrackerDataLayer
 
             return AllTasks;    
         }
-        public static List<TaskDTO> GetTasksDone()
+        public static List<TaskDTO> GetTaskByStatus(int TaskStatus)
         {
-            List<TaskDTO> tasksDone = new List<TaskDTO>();
+            List<TaskDTO> tasks = new List<TaskDTO>();
 
             try
             {
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                using(SqlConnection connection = new SqlConnection(ConnectionString))
+                using(SqlCommand command = new SqlCommand("Sp_GetTaskByStatus", connection))
                 {
-                    using (SqlCommand command = new SqlCommand("Sp_GetTasksDone", connection))
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@Status", TaskStatus);
+
+                    connection.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        connection.Open();
-
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        if (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                tasksDone.Add(new TaskDTO(
+                            tasks.Add(
+                                new TaskDTO(
                                     reader.GetInt32(reader.GetOrdinal("TaskId")),
                                     reader.GetString(reader.GetOrdinal("Description")),
                                     reader.GetByte(reader.GetOrdinal("Status")),
                                     reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
                                     reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-                                    ));
-                            }
+                                ));
+                        }
+                        else
+                        {
+                            return null;
                         }
                     }
                     connection.Close();
@@ -101,85 +115,7 @@ namespace TaskTrackerDataLayer
                 throw;
             }
 
-            return tasksDone;
-        }
-        public static List<TaskDTO> GetTaskInProgress()
-        {
-            List<TaskDTO> tasksInProgress = new List<TaskDTO>();
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
-                {
-                    using (SqlCommand command = new SqlCommand("Sp_GetTasksInProgress", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        connection.Open();
-
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                tasksInProgress.Add(new TaskDTO(
-                                    reader.GetInt32(reader.GetOrdinal("TaskId")),
-                                    reader.GetString(reader.GetOrdinal("Description")),
-                                    reader.GetByte(reader.GetOrdinal("Status")),
-                                    reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                                    reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-                                    ));
-                            }
-                        }
-                    }
-                    connection.Close();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return tasksInProgress;
-        }
-        public static List<TaskDTO> GetTasksNotDone()
-        {
-            List<TaskDTO> tasksInProgress = new List<TaskDTO>();
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
-                {
-                    using (SqlCommand command = new SqlCommand("Sp_GetTasksNotDone", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        connection.Open();
-
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                tasksInProgress.Add(new TaskDTO(
-                                    reader.GetInt32(reader.GetOrdinal("TaskId")),
-                                    reader.GetString(reader.GetOrdinal("Description")),
-                                    reader.GetByte(reader.GetOrdinal("Status")),
-                                    reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                                    reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-                                    ));
-                            }
-                        }
-                    }
-                    connection.Close();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return tasksInProgress;
+            return tasks;
         }
         public static TaskDTO GetTaskByID(int TaskId)
         {
@@ -189,6 +125,8 @@ namespace TaskTrackerDataLayer
                 using (SqlCommand command = new SqlCommand("Sp_GetTaskByID", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@TaskID", TaskId);
 
                     connection.Open();
 
@@ -206,7 +144,6 @@ namespace TaskTrackerDataLayer
 
                         }
                     }
-                    connection.Close();
                 }
             }
             catch (Exception)
@@ -258,14 +195,135 @@ namespace TaskTrackerDataLayer
 
             return newTaskID;
         }
-        //public static bool UpdateTask()
-        //{
+        public static bool UpdateTask(TaskDTO DTO)
+        {
+            int rowsAffected = 0;
 
-        //}
-        //public static bool DeleteTask()
-        //{
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("Sp_UpdateTask", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
 
-        //}
+                        command.Parameters.AddWithValue("@TaskId", DTO.TaskID);
+                        command.Parameters.AddWithValue("@Description", DTO.TaskDescription);
+                        command.Parameters.AddWithValue("@Status", DTO.TaskStatus);
+                        command.Parameters.AddWithValue("@CreatedAt", DTO.CreatedAt);
+                        command.Parameters.AddWithValue("@UpdatedAt", DTO.UpdatedAt);
 
+                        connection.Open();
+
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && int.TryParse(result.ToString(), out int returnValue))
+                        {
+                            rowsAffected = Convert.ToInt32(result);
+                        }
+
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return rowsAffected > 0;
+        }
+        public static bool DeleteTask(int TaskId)
+        {
+            int rowsAffected = 0;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("Sp_DeleteTask", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        
+                        command.Parameters.AddWithValue("@TaskId", TaskId);
+
+                        connection.Open();
+
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && int.TryParse(result.ToString(), out int returnValue))
+                        {
+                            rowsAffected = Convert.ToInt32(result);
+                        }
+
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return rowsAffected > 0;
+        }
+        public static bool MarkTaskInProgress(int taskId)
+        {
+            int rowsAffected = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("Sp_MarkTaskAsInProgress", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@TaskId", taskId);
+
+                        connection.Open();
+
+                        rowsAffected = command.ExecuteNonQuery();
+
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return rowsAffected > 0;
+        }
+        public static bool MarkTaskDone(int taskId)
+        {
+            int rowsAffected = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("Sp_MarkTaskDone", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@TaskId", taskId);
+
+                        connection.Open();
+
+                        rowsAffected = command.ExecuteNonQuery();
+
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return rowsAffected > 0;
+        }
     }
 }
