@@ -11,9 +11,9 @@ namespace TaskTrackerApiLayer.Controllers
         [HttpGet("AllTasks", Name = "GetAllTasks")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<TaskDTO>> getAllTasks()
+        public async Task<ActionResult<List<TaskDTO>>> getAllTasks()
         {
-            List<TaskDTO> tasks = TaskTracker.GetAllTaskList();
+            List<TaskDTO> tasks = await TaskTracker.GetAllTaskList();
 
             if (tasks == null)
             {
@@ -25,9 +25,9 @@ namespace TaskTrackerApiLayer.Controllers
         [HttpGet("TasksDone", Name = "GetTasksDone")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public  ActionResult<List<TaskDTO>> GetTasksDone()
+        public async  Task<ActionResult<List<TaskDTO>>> GetTasksDone()
         {
-            List<TaskDTO> tasks = TaskTracker.GetTasksDone();
+            List<TaskDTO> tasks = await TaskTracker.GetTasksDone();
 
             if (tasks == null)
             {
@@ -39,9 +39,9 @@ namespace TaskTrackerApiLayer.Controllers
         [HttpGet("TasksInProgress", Name = "GetTasksInProgress")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<TaskDTO>> GetTaskInProgress()
+        public async Task<ActionResult<List<TaskDTO>>> GetTaskInProgress()
         {
-            List<TaskDTO> tasks = TaskTracker.GetTaskInProgress();
+            List<TaskDTO> tasks = await TaskTracker.GetTaskInProgress();
 
             if (tasks == null)
             {
@@ -53,9 +53,9 @@ namespace TaskTrackerApiLayer.Controllers
         [HttpGet("TaskNotDone", Name = "GetTasksNotDoe")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<TaskDTO>> GetTaskNotDone()
+        public async Task<ActionResult<List<TaskDTO>>> GetTaskNotDone()
         {
-            List<TaskDTO> tasks = TaskTracker.GetTasksNotDone();
+            List<TaskDTO> tasks = await TaskTracker.GetTasksNotDone();
 
             if (tasks == null)
             {
@@ -68,14 +68,14 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<TaskDTO> GetTaskById(int taskId)
+        public async Task<ActionResult<TaskDTO>> GetTaskById(int taskId)
         {
             if (taskId < 1)
             {
                 return BadRequest("Id less then 1, Bad request");
             }
 
-            TaskTracker task = TaskTracker.FindTaskById(taskId);
+            TaskTracker task = await TaskTracker.FindTaskById(taskId);
 
             if (task == null)
             {
@@ -90,7 +90,7 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<TaskDTO> AddNewTask(TaskDTO newDto)
+        public async Task<ActionResult<TaskDTO>> AddNewTask(TaskDTO newDto)
         {
             if (newDto.TaskDescription == string.Empty || newDto.TaskStatus < 0)
             {
@@ -104,7 +104,7 @@ namespace TaskTrackerApiLayer.Controllers
                 return NotFound("Object empty");
             }
 
-            if (task.Save())
+            if (await task.Save())
             {
                 newDto.TaskID = task.TaskID;
                 // add new id
@@ -119,14 +119,14 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<TaskDTO> UpdateTask(int taskId, TaskDTO Dto)
+        public async Task<ActionResult<TaskDTO>> UpdateTask(int taskId, TaskDTO Dto)
         {
             if (taskId <= 0 || Dto.TaskDescription == string.Empty || Dto.TaskStatus <= 0)
             {
                 return BadRequest("Bad Request");
             }
 
-            TaskTracker task = TaskTracker.FindTaskById(taskId);
+            TaskTracker task = await TaskTracker.FindTaskById(taskId);
 
             if (task == null)
             {
@@ -139,7 +139,7 @@ namespace TaskTrackerApiLayer.Controllers
             task.CreatedAt = Dto.CreatedAt;
             task.UpdatedAt = Dto.UpdatedAt;
 
-            if (task.Save())
+            if (await task.Save())
             {
                 return Ok("Task Updated successfully");
             }
@@ -150,21 +150,21 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<string> DeleteTask(int taskId)
+        public async Task<ActionResult<string>> DeleteTask(int taskId)
         {
             if (taskId < 0)
             {
                 return BadRequest($"Id {taskId} less than 1, Bad request");
             }
 
-            TaskTracker taskDeleted = TaskTracker.FindTaskById(taskId);
+            TaskTracker taskDeleted = await TaskTracker.FindTaskById(taskId);
 
             if (taskDeleted == null)
             {
                 return NotFound("Task not found");
             }
 
-            if (TaskTracker.DeleteTask(taskId))
+            if (await TaskTracker.DeleteTask(taskId))
             {
                 return Ok("Task Deleted successfully");
             }
@@ -175,21 +175,21 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<string> MarkTaskInProgress(int taskId)
+        public async Task<ActionResult<string>> MarkTaskInProgress(int taskId)
         {
             if (taskId < 0)
             {
                 return BadRequest($"Id {taskId} less than 1, Bad request");
             }
 
-            TaskTracker taskDeleted = TaskTracker.FindTaskById(taskId);
+            TaskTracker taskDeleted = await TaskTracker.FindTaskById(taskId);
 
             if (taskDeleted == null)
             {
                 return NotFound("Task not found");
             }
 
-            if (TaskTracker.MarkTaskInProgress(taskId))
+            if (await TaskTracker.MarkTaskInProgress(taskId))
             {
                 return Ok("Task marked in progress successfully");
             }
@@ -200,21 +200,21 @@ namespace TaskTrackerApiLayer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<string> MarkTaskDone(int taskId)
+        public async Task<ActionResult<string>> MarkTaskDone(int taskId)
         {
             if (taskId < 0)
             {
                 return BadRequest($"Id {taskId} less than 1, Bad request");
             }
 
-            TaskTracker taskDeleted = TaskTracker.FindTaskById(taskId);
+            TaskTracker taskDeleted = await TaskTracker.FindTaskById(taskId);
 
             if (taskDeleted == null)
             {
                 return NotFound("Task not found");
             }
 
-            if (TaskTracker.MarkTaskDone(taskId))
+            if (await TaskTracker.MarkTaskDone(taskId))
             {
                 return Ok("Task marked done successfully");
             }

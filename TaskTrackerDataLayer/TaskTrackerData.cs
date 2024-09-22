@@ -27,7 +27,7 @@ namespace TaskTrackerDataLayer
         public static string ConnectionString = "Server = .; Database = TaskTracker; User id = sa; Password = 123456; " +
             "Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;";
 
-        public static List<TaskDTO> GetAllTaskList()
+        public static async Task<List<TaskDTO>> GetAllTaskList()
         {
             List<TaskDTO> AllTasks = new List<TaskDTO>();
 
@@ -41,7 +41,7 @@ namespace TaskTrackerDataLayer
 
                         connection.Open();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
                             if (reader.HasRows)
                             {
@@ -74,7 +74,7 @@ namespace TaskTrackerDataLayer
 
             return AllTasks;    
         }
-        public static List<TaskDTO> GetTaskByStatus(int TaskStatus)
+        public static async Task<List<TaskDTO>> GetTaskByStatus(int TaskStatus)
         {
             List<TaskDTO> tasks = new List<TaskDTO>();
 
@@ -88,7 +88,7 @@ namespace TaskTrackerDataLayer
                     command.Parameters.AddWithValue("@Status", TaskStatus);
 
                     connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         if (reader.Read())
                         {
@@ -117,7 +117,7 @@ namespace TaskTrackerDataLayer
 
             return tasks;
         }
-        public static TaskDTO GetTaskByID(int TaskId)
+        public static async Task<TaskDTO> GetTaskByID(int TaskId)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace TaskTrackerDataLayer
 
                     connection.Open();
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         if (reader.Read())
                         {
@@ -153,7 +153,7 @@ namespace TaskTrackerDataLayer
 
             return null;
         }
-        public static int AddNewTask(TaskDTO DTO)
+        public static async Task<int> AddNewTask(TaskDTO DTO)
         {
             int newTaskID = 0;
 
@@ -179,7 +179,7 @@ namespace TaskTrackerDataLayer
                         
                         connection.Open();
 
-                        command.ExecuteNonQuery();
+                        await command.ExecuteNonQueryAsync();
 
                         connection.Close();
 
@@ -195,7 +195,7 @@ namespace TaskTrackerDataLayer
 
             return newTaskID;
         }
-        public static bool UpdateTask(TaskDTO DTO)
+        public static async Task<bool> UpdateTask(TaskDTO DTO)
         {
             int rowsAffected = 0;
 
@@ -215,7 +215,7 @@ namespace TaskTrackerDataLayer
 
                         connection.Open();
 
-                        object result = command.ExecuteScalar();
+                        object? result = await command.ExecuteScalarAsync();
 
                         if (result != null && int.TryParse(result.ToString(), out int returnValue))
                         {
@@ -234,7 +234,7 @@ namespace TaskTrackerDataLayer
 
             return rowsAffected > 0;
         }
-        public static bool DeleteTask(int TaskId)
+        public static async Task<bool> DeleteTask(int TaskId)
         {
             int rowsAffected = 0;
 
@@ -250,7 +250,7 @@ namespace TaskTrackerDataLayer
 
                         connection.Open();
 
-                        object result = command.ExecuteScalar();
+                        object? result = await command.ExecuteScalarAsync();
 
                         if (result != null && int.TryParse(result.ToString(), out int returnValue))
                         {
@@ -269,7 +269,7 @@ namespace TaskTrackerDataLayer
 
             return rowsAffected > 0;
         }
-        public static bool MarkTaskInProgress(int taskId)
+        public static async Task<bool> MarkTaskInProgress(int taskId)
         {
             int rowsAffected = 0;
             try
@@ -284,7 +284,7 @@ namespace TaskTrackerDataLayer
 
                         connection.Open();
 
-                        rowsAffected = command.ExecuteNonQuery();
+                        rowsAffected = await command.ExecuteNonQueryAsync();
 
                         connection.Close();
                     }
@@ -297,7 +297,7 @@ namespace TaskTrackerDataLayer
             }
             return rowsAffected > 0;
         }
-        public static bool MarkTaskDone(int taskId)
+        public static async Task<bool> MarkTaskDone(int taskId)
         {
             int rowsAffected = 0;
             try
@@ -312,7 +312,7 @@ namespace TaskTrackerDataLayer
 
                         connection.Open();
 
-                        rowsAffected = command.ExecuteNonQuery();
+                        rowsAffected = await command.ExecuteNonQueryAsync();
 
                         connection.Close();
                     }
