@@ -45,25 +45,25 @@ namespace TaskTrackerBusinessLogic
 
             Mode = mode;
         }
-        public static List<TaskDTO> GetAllTaskList()
+        public static async Task<List<TaskDTO>> GetAllTaskList()
         {
-            return TaskTrackerData.GetAllTaskList();
+            return await TaskTrackerData.GetAllTaskList();
         }
-        public static List<TaskDTO> GetTasksDone()
+        public static async Task<List<TaskDTO>> GetTasksDone()
         {
-            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.Done);
+            return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.Done);
         }
-        public static List<TaskDTO> GetTaskInProgress()
+        public static async Task<List<TaskDTO>> GetTaskInProgress()
         {
-            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.InProgress);
+            return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.InProgress);
         }
-        public static List<TaskDTO> GetTasksNotDone()
+        public static async Task<List<TaskDTO>> GetTasksNotDone()
         {
-            return TaskTrackerData.GetTaskByStatus((int)enTaskStatus.NotDone);
+            return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.NotDone);
         }
-        public static TaskTracker FindTaskById(int TaskId)
+        public static async Task<TaskTracker> FindTaskById(int TaskId)
         {
-            TaskDTO DTO = TaskTrackerData.GetTaskByID(TaskId);
+            TaskDTO DTO = await TaskTrackerData.GetTaskByID(TaskId);
 
             if (DTO != null)
             {
@@ -74,36 +74,36 @@ namespace TaskTrackerBusinessLogic
                 return null;
             }
         }
-        private bool _AddNewTask()
+        private async Task<bool> _AddNewTask()
         {
-            this.TaskID = TaskTrackerData.AddNewTask(this.DTO);
+            this.TaskID = await TaskTrackerData.AddNewTask(this.DTO);
             return TaskID != 0;
         }
-        private bool _UpdateTask()
+        private async Task<bool> _UpdateTask()
         {
-            return TaskTrackerData.UpdateTask(this.DTO);
+            return await TaskTrackerData.UpdateTask(this.DTO);
         }
-        public static bool DeleteTask(int TaskId)
+        public static async Task<bool> DeleteTask(int TaskId)
         {
-            return TaskTrackerData.DeleteTask(TaskId);
+            return await TaskTrackerData.DeleteTask(TaskId);
         }
-        public static bool MarkTaskInProgress(int taskId)
+        public static async Task<bool> MarkTaskInProgress(int taskId)
         {
-            return TaskTrackerData.MarkTaskInProgress(taskId);
+            return await TaskTrackerData.MarkTaskInProgress(taskId);
         }
-        public static bool MarkTaskDone(int taskId)
+        public static async Task<bool> MarkTaskDone(int taskId)
         {
-            return TaskTrackerData.MarkTaskDone(taskId);
+            return await TaskTrackerData.MarkTaskDone(taskId);
         }
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (Mode)
             {
                 case enMode.AddNew:
                     Mode = enMode.Update;
-                    return _AddNewTask();
+                    return await _AddNewTask();
                 case enMode.Update:
-                    return _UpdateTask();
+                    return await _UpdateTask();
             }
 
             return false;
