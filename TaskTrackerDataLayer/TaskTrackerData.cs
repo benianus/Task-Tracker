@@ -27,9 +27,9 @@ namespace TaskTrackerDataLayer
         public static string ConnectionString = "Server = .; Database = TaskTracker; User id = sa; Password = 123456; " +
             "Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;";
 
-        public static async Task<List<TaskDTO>> GetAllTaskList()
+        public static async Task<List<TaskDTO>?> GetAllTaskList()
         {
-            List<TaskDTO> AllTasks = new List<TaskDTO>();
+            List<TaskDTO>? AllTasks = new List<TaskDTO>();
 
             try
             {
@@ -53,14 +53,13 @@ namespace TaskTrackerDataLayer
                                         reader.GetByte(reader.GetOrdinal("Status")),
                                         reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
                                         reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-                                        ));
+                                    ));
                                 }
                             }
                             else
                             {
                                 return null;
                             }
-
                         }
                     }
                     connection.Close();
@@ -72,22 +71,23 @@ namespace TaskTrackerDataLayer
                 throw;
             }
 
-            return AllTasks;    
+            return AllTasks;
         }
-        public static async Task<List<TaskDTO>> GetTaskByStatus(int TaskStatus)
+        public static async Task<List<TaskDTO>?> GetTaskByStatus(int TaskStatus)
         {
-            List<TaskDTO> tasks = new List<TaskDTO>();
+            List<TaskDTO>? tasks = new List<TaskDTO>();
 
             try
             {
-                using(SqlConnection connection = new SqlConnection(ConnectionString))
-                using(SqlCommand command = new SqlCommand("Sp_GetTaskByStatus", connection))
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                using (SqlCommand command = new SqlCommand("Sp_GetTaskByStatus", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
                     command.Parameters.AddWithValue("@Status", TaskStatus);
 
                     connection.Open();
+
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         if (reader.Read())
@@ -117,7 +117,7 @@ namespace TaskTrackerDataLayer
 
             return tasks;
         }
-        public static async Task<TaskDTO> GetTaskByID(int TaskId)
+        public static async Task<TaskDTO?> GetTaskByID(int TaskId)
         {
             try
             {
@@ -171,12 +171,12 @@ namespace TaskTrackerDataLayer
                         command.Parameters.AddWithValue("@updatedAt", DTO.UpdatedAt);
 
                         var outputParameter = new SqlParameter("@newTaskId", SqlDbType.Int)
-                        { 
-                            Direction = ParameterDirection.Output 
+                        {
+                            Direction = ParameterDirection.Output
                         };
 
                         command.Parameters.Add(outputParameter);
-                        
+
                         connection.Open();
 
                         await command.ExecuteNonQueryAsync();
@@ -245,7 +245,7 @@ namespace TaskTrackerDataLayer
                     using (SqlCommand command = new SqlCommand("Sp_DeleteTask", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        
+
                         command.Parameters.AddWithValue("@TaskId", TaskId);
 
                         connection.Open();

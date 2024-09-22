@@ -45,25 +45,25 @@ namespace TaskTrackerBusinessLogic
 
             Mode = mode;
         }
-        public static async Task<List<TaskDTO>> GetAllTaskList()
+        public static async Task<List<TaskDTO>?> GetAllTaskList()
         {
             return await TaskTrackerData.GetAllTaskList();
         }
-        public static async Task<List<TaskDTO>> GetTasksDone()
+        public static async Task<List<TaskDTO>?> GetTasksDone()
         {
             return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.Done);
         }
-        public static async Task<List<TaskDTO>> GetTaskInProgress()
+        public static async Task<List<TaskDTO>?> GetTaskInProgress()
         {
             return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.InProgress);
         }
-        public static async Task<List<TaskDTO>> GetTasksNotDone()
+        public static async Task<List<TaskDTO>?> GetTasksNotDone()
         {
             return await TaskTrackerData.GetTaskByStatus((int)enTaskStatus.NotDone);
         }
-        public static async Task<TaskTracker> FindTaskById(int TaskId)
+        public static async Task<TaskTracker?> FindTaskById(int TaskId)
         {
-            TaskDTO DTO = await TaskTrackerData.GetTaskByID(TaskId);
+            TaskDTO? DTO = await TaskTrackerData.GetTaskByID(TaskId);
 
             if (DTO != null)
             {
